@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35507.96
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameboyColorReducer.Core", "GameboyColorReducer.Core\GameboyColorReducer.Core.csproj", "{AFA2F669-BBD2-434D-BA6F-CB2000A9E99F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameboyColorReducer.Benchmark", "GameboyColorReducer.Benchmark\GameboyColorReducer.Benchmark.csproj", "{BBB70CCD-6D93-4531-8D29-A63CBE1B03AC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AFA2F669-BBD2-434D-BA6F-CB2000A9E99F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFA2F669-BBD2-434D-BA6F-CB2000A9E99F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFA2F669-BBD2-434D-BA6F-CB2000A9E99F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA2F669-BBD2-434D-BA6F-CB2000A9E99F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBB70CCD-6D93-4531-8D29-A63CBE1B03AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBB70CCD-6D93-4531-8D29-A63CBE1B03AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBB70CCD-6D93-4531-8D29-A63CBE1B03AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBB70CCD-6D93-4531-8D29-A63CBE1B03AC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C59C3D25-B41F-406E-9CDA-EE167571081B}
+	EndGlobalSection
+EndGlobal
