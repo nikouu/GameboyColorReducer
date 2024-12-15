@@ -34,7 +34,7 @@ namespace GameboyColorReducer.Core.ImageConverters
                             for (int x = 0; x < 8; x++)
                             {
                                 var pixel = pixelRow[i + x];
-                                gbcPixels[x, y] = Colour.FromRgb(pixel.R, pixel.G, pixel.B);
+                                gbcPixels[x, y] = Colour.FromRgb(pixel.A, pixel.R, pixel.G, pixel.B);
                             }
                         }
                     });
@@ -62,7 +62,7 @@ namespace GameboyColorReducer.Core.ImageConverters
                             var pixelRow = accessor.GetRowSpan(j + y);
                             for (int x = 0; x < 8; x++)
                             {
-                                var color = tile.GbcPixels[x, y];
+                                var color = tile.GbPixels[x, y];
                                 pixelRow[i + x] = new Rgba32(color.R, color.G, color.B, color.A);
                             }
                         }

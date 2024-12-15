@@ -41,6 +41,11 @@ namespace GameboyColorReducer.Core.Models
             return FromArgb(255, red, green, blue);
         }
 
+        public static Colour FromRgb(int alpha, int red, int green, int blue)
+        {
+            return FromArgb(alpha, red, green, blue);
+        }
+
         public static Colour FromArgb(int alpha, int red, int green, int blue)
         {
             CheckByte(alpha, nameof(alpha));

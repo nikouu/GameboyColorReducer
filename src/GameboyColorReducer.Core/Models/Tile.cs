@@ -17,6 +17,9 @@ namespace GameboyColorReducer.Core.Models
         public Colour[,] GbPixels => _gbPixels;
 
         public readonly Colour[] GbcColours;
+        public readonly string GbcColoursKey;
+
+        public bool IsProcessed { get; set; } = false;
 
         private readonly int _gbcColoursHash;
 
@@ -27,6 +30,7 @@ namespace GameboyColorReducer.Core.Models
             GbcPixels = gbcPixels;
 
             GbcColours = [.. gbcPixels.Cast<Colour>().Distinct().OrderBy(x => x.GetHashCode())];
+            GbcColoursKey = GenerateColourKeyString();
 
             var hash = 0;
             foreach (var colour in GbcColours)
@@ -63,6 +67,18 @@ namespace GameboyColorReducer.Core.Models
         public override int GetHashCode()
         {
             return _gbcColoursHash;
+        }
+
+        public string GenerateColourKeyString()
+        {
+            var stringBuilder = new StringBuilder();
+
+            foreach (var item in GbcColours.OrderBy(x => x.GetBrightness()))
+            {
+                stringBuilder.Append(item);
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }

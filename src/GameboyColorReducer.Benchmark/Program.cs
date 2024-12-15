@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using GameboyColorReducer.Core;
 using GameboyColorReducer.Core.ImageConverters;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,10 +7,14 @@ Console.WriteLine("Hello, World!");
 
 var g = new ImageSharpImageConverter();
 
-var b = File.ReadAllBytes("Images/mokki1.png");
+var b = File.ReadAllBytes("Images/mokki.png");
 
-var h = g.ConvertToWorkingImage(b);
+var h = g.ToWorkingImage(b);
 
-var k = g.ConvertToByteArray(h);
+var e = new ColourReducer();
 
-File.WriteAllBytes("Images/mokki2.png", k);
+e.Process(h);
+
+var k = g.ToByteArray(h);
+
+File.WriteAllBytes("Images/mokki-reduced.png", k);
