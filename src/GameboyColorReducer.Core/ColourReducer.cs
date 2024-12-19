@@ -11,13 +11,25 @@ namespace GameboyColorReducer.Core
     {
         private Dictionary<Colour[], Dictionary<Colour, Colour>> _colourMappingCache = new(new ColourArrayEqualityComparer());
 
+        // todo: issue where white obviously needs to be used, but a brighter colour takes over. see the cerulean city windows
         public void Process(WorkingImage workingImage)
         {
             ProcessEasyTiles(workingImage);
-            ProcessTransparentTiles(workingImage);
+           // ProcessTransparentTiles(workingImage);
+            
+            //ProcessBasedOnExistingTileColours(workingImage);
+            //ProcessBasedOnBestNearestEstimate(workingImage);
 
-            ProcessBasedOnExistingTileColours(workingImage);
-            ProcessBasedOnBestNearestEstimate(workingImage);
+            // todo: what about a new algorithm that walks by checking up, right, down, left of a four colour tile.
+            // this is under the assumption that adjacent tiles will be part of the same larger picture, and will have lines and colours
+            // that extend beyond a single tile. this might end up working nicely for art like intro scenes, cut scenes, key art, but it might not
+            // work as well for actual tilesets in a tile based game. but might work well otherwise, could be worth looking more into non-top down tile
+            // games such as Top Gear Pocket 2, which uses parallax scrolling that might not be the whole picture on screen at once.
+            // start with only applying it if there is just like one less colour diff. so going from a 4 colour to a 3 colour that has 2 of the colours common to the 4 colour.
+            // unsure how deep to go with the 4 to 3, then to 3 to 2, etc. but if there are tiles left over, a new sweep of unfinished tiles could be done which look at their up, right, down, left tiels and see which
+            // one has the missing colour(s) and work out somehow which colour to pock
+
+            //_colourMappingCache.Clear();
         }
 
         private void ProcessEasyTiles(WorkingImage workingImage)
@@ -44,7 +56,7 @@ namespace GameboyColorReducer.Core
                         {
                             var compareToTiles = tileGroups.Where(x => x.Key == tileGroup.Key + 1).First().Where(x => x.IsProcessed).OrderBy(x => x.GbcColours.Length);
 
-                            ProcessFromSimilarColouredTiles(tile, compareToTiles);
+                            //ProcessFromSimilarColouredTiles(tile, compareToTiles);
                         }
                     }
                 }
@@ -146,7 +158,17 @@ namespace GameboyColorReducer.Core
 
                                 var remainingColourOptions = Colour.GbColourList.Except(existingGbColoursForTile);
 
-                                var bestMatch = remainingColourOptions.OrderBy(x => Math.Abs(x.GetBrightness() - gbcColourBrightness)).First();
+
+
+                                Colour bestMatch;
+
+                                try
+                                {
+                                    bestMatch = remainingColourOptions.OrderBy(x => Math.Abs(x.GetBrightness() - gbcColourBrightness)).First();
+                                } catch
+                                {
+                                    bestMatch = Colour.FromRgb(255, 87, 51);
+                                }
 
                                 tile.GbPixels[x, y] = bestMatch;
                                 colourMapping.TryAdd(gbcColour, bestMatch);

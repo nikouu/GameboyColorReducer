@@ -57,6 +57,7 @@ namespace GameboyColorReducer.Core.ImageConverters
                     var tile = workingImage.Tiles[i / 8, j / 8];
                     image.ProcessPixelRows(accessor =>
                     {
+                        // todo: validate colour count per tile
                         for (int y = 0; y < 8; y++)
                         {
                             var pixelRow = accessor.GetRowSpan(j + y);
