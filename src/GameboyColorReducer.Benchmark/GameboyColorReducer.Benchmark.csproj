@@ -36,6 +36,9 @@
     <None Update="Images\ZeldaOracleOfSeasonsTitleScreen.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Images\ZeldaOracleOfSeasonsTitleScreenFull.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

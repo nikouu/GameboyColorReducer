@@ -15,24 +15,18 @@ namespace GameboyColorReducer.Core
         public void Process(WorkingImage workingImage)
         {
             FirstSweep(workingImage);
+            SecondSweep(workingImage);
+            ThirdSweep(workingImage);
             //ProcessEasyTiles(workingImage);
             // ProcessTransparentTiles(workingImage);
 
             //ProcessBasedOnExistingTileColours(workingImage);
             //ProcessBasedOnBestNearestEstimate(workingImage);
 
-            // todo: what about a new algorithm that walks by checking up, right, down, left of a four colour tile.
-            // this is under the assumption that adjacent tiles will be part of the same larger picture, and will have lines and colours
-            // that extend beyond a single tile. this might end up working nicely for art like intro scenes, cut scenes, key art, but it might not
-            // work as well for actual tilesets in a tile based game. but might work well otherwise, could be worth looking more into non-top down tile
-            // games such as Top Gear Pocket 2, which uses parallax scrolling that might not be the whole picture on screen at once.
-            // start with only applying it if there is just like one less colour diff. so going from a 4 colour to a 3 colour that has 2 of the colours common to the 4 colour.
-            // unsure how deep to go with the 4 to 3, then to 3 to 2, etc. but if there are tiles left over, a new sweep of unfinished tiles could be done which look at their up, right, down, left tiels and see which
-            // one has the missing colour(s) and work out somehow which colour to pock
-
             //_colourMappingCache.Clear();
         }
 
+        // colours whole tile
         private void FirstSweep(WorkingImage workingImage)
         {
             var processedTiles = new Dictionary<int, List<Tile>>();
@@ -60,7 +54,7 @@ namespace GameboyColorReducer.Core
                     {
                         if (adjacentTile.GbcColours.Length == i - 1)
                         {
-                            ProcessFromSimilarColouredTiles(adjacentTile, [tile]);
+                            ProcessFromSupersetTiles(adjacentTile, [tile]);
                             if (adjacentTile.IsProcessed)
                             {
                                 processedTiles[adjacentTile.GbcColours.Length].Add(adjacentTile);
@@ -80,7 +74,7 @@ namespace GameboyColorReducer.Core
 
             // now for skip tiles, 4 to 2, 3 to 1
 
-            for (int i = 4; i > 3; i--)
+            for (int i = 4; i > 2; i--)
             {
                 var tiles = workingImage.Tiles.ToIEnumerable().Where(x => x.GbcColours.Length == i).ToList();
 
@@ -91,7 +85,7 @@ namespace GameboyColorReducer.Core
                     {
                         if (adjacentTile.GbcColours.Length == i - 2)
                         {
-                            ProcessFromSimilarColouredTiles(adjacentTile, [tile]);
+                            ProcessFromSupersetTiles(adjacentTile, [tile]);
                         }
                     }
                 }
@@ -105,7 +99,9 @@ namespace GameboyColorReducer.Core
                 }
             }
 
-            foreach(var tile in workingImage.Tiles.ToIEnumerable().Where(x => !x.IsProcessed))
+            var tempCache = new Dictionary<Colour[], Dictionary<Colour, Colour>>();
+
+            foreach (var tile in workingImage.Tiles.ToIEnumerable().Where(x => !x.IsProcessed))
             {
                 foreach (var cacheItem in _colourMappingCache)
                 {
@@ -123,13 +119,182 @@ namespace GameboyColorReducer.Core
                             }
                         }
 
-                        //_colourMappingCache.TryAdd(tile.GbcColours, newColourMapping);
+                        tempCache.TryAdd(tile.GbcColours, newColourMapping);
                         tile.IsProcessed = true;
                     }
                 }
             }
 
+            // unsure if this is needed
+            foreach (var item in tempCache)
+            {
+                _colourMappingCache.TryAdd(item.Key, item.Value);
+            }
+
             return;
+        }
+
+        // colours individual pixels
+        private void SecondSweep(WorkingImage workingImage)
+        {
+            var finishedTiles = workingImage.Tiles.ToIEnumerable().Where(x => x.IsProcessed).ToList();
+
+            foreach (var tile in finishedTiles)
+            {
+                var adjacentTiles = GetAdjacentTiles(tile, workingImage);
+                foreach (var adjacentTile in adjacentTiles)
+                {
+                    if (!adjacentTile.IsProcessed)
+                    {
+                        if (_colourMappingCache.ContainsKey(adjacentTile.GbcColours))
+                        {
+                            ProcessFromCache(adjacentTile);
+                        }
+                        else
+                        {
+                            var tileCache = _colourMappingCache[tile.GbcColours];
+
+                            if (adjacentTile.GbcColours.Any(gbcColour => tile.GbcColours.Contains(gbcColour)))
+                            {
+                                var newColourMapping = new Dictionary<Colour, Colour>();
+
+                                var pixelCounter = 0;
+                                for (int y = 0; y < 8; y++)
+                                {
+                                    for (int x = 0; x < 8; x++)
+                                    {
+                                        var gbcColour = adjacentTile.GbcPixels[x, y];
+
+                                        if (tileCache.TryGetValue(gbcColour, out var gbColour))
+                                        {
+                                            adjacentTile.GbPixels[x, y] = gbColour;
+                                            newColourMapping.TryAdd(gbcColour, gbColour);
+                                            pixelCounter++;
+                                        }
+                                    }
+                                }
+
+                                // cant add to cache because its not completed
+                                //_colourMappingCache.TryAdd(adjacentTile.GbcColours, newColourMapping);
+
+
+                                if (pixelCounter == 64)
+                                {
+                                    adjacentTile.IsProcessed = true;
+                                    _colourMappingCache.TryAdd(adjacentTile.GbcColours, newColourMapping);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ThirdSweep(WorkingImage workingImage)
+        {
+            // only dealing with unknown colours now
+            // get the unfinished tiles, group by closest to furthest completed then process with the approx colour one from before
+
+            var unfinishedTiles = workingImage.Tiles.ToIEnumerable().Where(x => !x.IsProcessed).ToList();
+            var tileGrouping = unfinishedTiles
+                .OrderByDescending(x => x.GbcColours.Length) // gets the colourful tiles out first
+                .GroupBy(x => x.GbcColours.Length - x.GbPixels.Cast<Colour>().Distinct().Count()) // group by how many colours remain
+                .OrderByDescending(x => x.Key).ToList(); // gets the most processed tile group first
+
+            foreach (var tileGroup in tileGrouping)
+            {
+                foreach (var tile in tileGroup)
+                {
+                    if (_colourMappingCache.ContainsKey(tile.GbcColours))
+                    {
+                        ProcessFromCache(tile);
+                        continue;
+                    }
+
+                    var missingColoursFromCache = tile.GbcColours.Where(gbcColour => _colourMappingCache.Keys.Any(key => key.Contains(gbcColour))).ToList();
+                    if (missingColoursFromCache.Any())
+                    {
+                        var newColourMapping = new Dictionary<Colour, Colour>();
+
+                        foreach (var cacheItem in _colourMappingCache)
+                        {
+                            foreach (var missingColour in missingColoursFromCache)
+                            {
+                                if (cacheItem.Key.Contains(missingColour))
+                                {
+                                    var cache = _colourMappingCache[cacheItem.Key];
+                                    for (int y = 0; y < 8; y++)
+                                    {
+                                        for (int x = 0; x < 8; x++)
+                                        {
+                                            var gbcColour = tile.GbcPixels[x, y];
+                                            if (cache.TryGetValue(gbcColour, out var gbColour))
+                                            {
+                                                tile.GbPixels[x, y] = gbColour;
+                                                newColourMapping.TryAdd(gbcColour, gbColour);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (tile.GbcColours.Length == tile.GbPixels.Cast<Colour>().Where(x => !x.IsDefault).Distinct().Count())
+                        {
+                            _colourMappingCache.TryAdd(tile.GbcColours, newColourMapping);
+                            tile.IsProcessed = true;
+                        }
+                        else
+                        {
+                            // todo: rent this object
+                            var colourMapping = new Dictionary<Colour, Colour>();
+                            // search through pixel by pixel then update the cache with the whole tile
+                            for (int y = 0; y < 8; y++)
+                            {
+                                for (int x = 0; x < 8; x++)
+                                {
+                                    var gbColour = tile.GbPixels[x, y];
+                                    var gbcColour = tile.GbcPixels[x, y];
+
+                                    if (colourMapping.TryGetValue(gbcColour, out Colour value))
+                                    {
+                                        tile.GbPixels[x, y] = value;
+                                    }
+                                    else if (gbColour.IsDefault)
+                                    {
+                                        var existingGbColoursForTile = tile.GbPixels.ToIEnumerable().Where(x => !x.IsDefault);
+
+                                        var gbcColourBrightness = gbcColour.GetBrightness();
+
+                                        var remainingColourOptions = Colour.GbColourList.Except(existingGbColoursForTile);
+
+                                        Colour bestMatch;
+
+                                        try
+                                        {
+                                            bestMatch = remainingColourOptions.OrderBy(x => Math.Abs(x.GetBrightness() - gbcColourBrightness)).First();
+                                        }
+                                        catch
+                                        {
+                                            bestMatch = Colour.FromRgb(255, 87, 51);
+                                        }
+
+                                        tile.GbPixels[x, y] = bestMatch;
+                                        colourMapping.TryAdd(gbcColour, bestMatch);
+                                    }
+                                    else
+                                    {
+                                        colourMapping.TryAdd(gbcColour, gbColour);
+                                    }
+                                }
+                            }
+
+                            _colourMappingCache.TryAdd(tile.GbcColours, colourMapping);
+                            tile.IsProcessed = true;
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -181,7 +346,7 @@ namespace GameboyColorReducer.Core
                         {
                             var compareToTiles = tileGroups.Where(x => x.Key == tileGroup.Key + 1).First().Where(x => x.IsProcessed).OrderBy(x => x.GbcColours.Length);
 
-                            //ProcessFromSimilarColouredTiles(tile, compareToTiles);
+                            //ProcessFromSupersetTiles(tile, compareToTiles);
                         }
                     }
                 }
@@ -213,26 +378,31 @@ namespace GameboyColorReducer.Core
 
             var step4 = step3.ToDictionary(k => k.Key, v => v.GroupBy(x => x.Value).OrderByDescending(x => x.Count()).First().First().Value);
 
-            foreach (var tile in workingImage.Tiles.ToIEnumerable().Where(x => !x.IsProcessed))
-            {
-                int pixelCounter = 0;
-                for (int y = 0; y < 8; y++)
-                {
-                    for (int x = 0; x < 8; x++)
-                    {
-                        var gbcColour = tile.GbcPixels[x, y];
 
-                        if (step4.TryGetValue(gbcColour, out Colour value))
+
+            foreach (var tileGroup in workingImage.Tiles.ToIEnumerable().Where(x => !x.IsProcessed).GroupBy(x => x.GbcColours.Length))
+            {
+                foreach (var tile in tileGroup)
+                {
+                    int pixelCounter = 0;
+                    for (int y = 0; y < 8; y++)
+                    {
+                        for (int x = 0; x < 8; x++)
                         {
-                            tile.GbPixels[x, y] = value;
-                            pixelCounter++;
+                            var gbcColour = tile.GbcPixels[x, y];
+
+                            if (step4.TryGetValue(gbcColour, out Colour value))
+                            {
+                                tile.GbPixels[x, y] = value;
+                                pixelCounter++;
+                            }
                         }
                     }
-                }
 
-                if (pixelCounter == 64)
-                {
-                    tile.IsProcessed = true;
+                    if (pixelCounter == 64)
+                    {
+                        tile.IsProcessed = true;
+                    }
                 }
             }
         }
@@ -355,7 +525,7 @@ namespace GameboyColorReducer.Core
             tile.IsProcessed = true;
         }
 
-        
+
 
         private void ProcessFromCache(Tile tile)
         {
@@ -371,7 +541,7 @@ namespace GameboyColorReducer.Core
             tile.IsProcessed = true;
         }
 
-        private void ProcessFromSimilarColouredTiles(Tile tile, IEnumerable<Tile> compareToTiles)
+        private void ProcessFromSupersetTiles(Tile tile, IEnumerable<Tile> compareToTiles)
         {
             foreach (var compareToTile in compareToTiles)
             {
