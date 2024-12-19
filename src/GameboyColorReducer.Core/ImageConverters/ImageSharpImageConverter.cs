@@ -39,7 +39,12 @@ namespace GameboyColorReducer.Core.ImageConverters
                         }
                     });
 
-                    tiles[i / 8, j / 8] = new Tile(i / 8, j / 8, gbcPixels);
+                    var x = i / 8;
+                    var y = j / 8;
+
+                    var id = (x * (image.Height / 8)) + y;
+
+                    tiles[x, y] = new Tile(id, x, y, gbcPixels);
                 }
             }
 

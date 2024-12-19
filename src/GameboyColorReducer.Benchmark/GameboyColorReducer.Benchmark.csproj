@@ -24,6 +24,12 @@
     <None Update="Images\PokemonCrystalJohtoFlyMap.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Images\test1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Wall1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Images\ZeldaOracleOfSeasonsIntro.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

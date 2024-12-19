@@ -8,6 +8,7 @@ namespace GameboyColorReducer.Core.Models
 {
     public class Tile : IEquatable<Tile>
     {
+        public readonly int Id;
         public readonly int X;
         public readonly int Y;
 
@@ -23,8 +24,9 @@ namespace GameboyColorReducer.Core.Models
 
         private readonly int _gbcColoursHash;
 
-        public Tile(int x, int y, Colour[,] gbcPixels)
+        public Tile(int id, int x, int y, Colour[,] gbcPixels)
         {
+            Id = id;
             X = x;
             Y = y;
             GbcPixels = gbcPixels;

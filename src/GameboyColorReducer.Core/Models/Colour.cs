@@ -62,6 +62,15 @@ namespace GameboyColorReducer.Core.Models
             );
         }
 
+        // https://stackoverflow.com/a/25168506
+        public static bool IsCloseColour(Colour a, Colour z, int threshold = 50)
+        {
+            int r = (int)a.R - z.R,
+                g = (int)a.G - z.G,
+                b = (int)a.B - z.B;
+            return (r * r + g * g + b * b) <= threshold * threshold;
+        }
+
         // https://www.nbdtech.com/Blog/archive/2008/04/27/calculating-the-perceived-brightness-of-a-color.aspx
         public int GetBrightness()
         {

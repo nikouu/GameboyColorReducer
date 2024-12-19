@@ -7,7 +7,7 @@ Console.WriteLine("Hello, World!");
 
 var g = new ImageSharpImageConverter();
 
-var b = File.ReadAllBytes("Images/mokki.png");
+var b = File.ReadAllBytes("Images/PokemonCrystalCeruleanCity.png");
 
 var h = g.ToWorkingImage(b);
 
@@ -17,4 +17,4 @@ e.Process(h);
 
 var k = g.ToByteArray(h);
 
-File.WriteAllBytes("Images/mokki-reduced.png", k);
+File.WriteAllBytes("Images/PokemonCrystalCeruleanCity-reduced.png", k);
