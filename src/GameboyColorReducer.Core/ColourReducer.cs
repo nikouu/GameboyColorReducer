@@ -14,9 +14,10 @@ namespace GameboyColorReducer.Core
         // todo: issue where white obviously needs to be used, but a brighter colour takes over. see the cerulean city windows
         public void Process(WorkingImage workingImage)
         {
-            FirstSweep(workingImage);
-            SecondSweep(workingImage);
-            ThirdSweep(workingImage);
+            QuantizeToGameBoyPalette(workingImage);
+            //FirstSweep(workingImage);
+            //SecondSweep(workingImage);
+            //ThirdSweep(workingImage);
             //ProcessEasyTiles(workingImage);
             // ProcessTransparentTiles(workingImage);
 
@@ -24,6 +25,57 @@ namespace GameboyColorReducer.Core
             //ProcessBasedOnBestNearestEstimate(workingImage);
 
             //_colourMappingCache.Clear();
+        }
+
+        private void QuantizeToGameBoyPalette(WorkingImage workingImage)
+        {
+            // Define the Game Boy palette
+            var palette = new[]
+            {
+                Colour.GBWhite,
+                Colour.GBLight,
+                Colour.GBDark,
+                Colour.GBBlack
+            };
+
+            foreach (var tile in workingImage.Tiles)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 8; x++)
+                    {
+                        var originalColor = tile.GbcPixels[x, y];
+                        var closestColor = FindClosestColor(originalColor, palette);
+                        tile.GbPixels[x, y] = closestColor;
+                    }
+                }
+            }
+        }
+
+        private Colour FindClosestColor(Colour originalColor, Colour[] palette)
+        {
+            Colour closestColor = palette[0];
+            double closestDistance = double.MaxValue;
+
+            foreach (var color in palette)
+            {
+                var distance = GetColorDistance(originalColor, color);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestColor = color;
+                }
+            }
+
+            return closestColor;
+        }
+
+        private double GetColorDistance(Colour c1, Colour c2)
+        {
+            int rDiff = c1.R - c2.R;
+            int gDiff = c1.G - c2.G;
+            int bDiff = c1.B - c2.B;
+            return Math.Sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
         }
 
         // colours whole tile
