@@ -12,32 +12,28 @@ namespace GameboyColorReducer.Core
         private Dictionary<Colour[], Dictionary<Colour, Colour>> _colourMappingCache = new(new ColourArrayEqualityComparer());
 
         // todo: issue where white obviously needs to be used, but a brighter colour takes over. see the cerulean city windows
-        public void Process(WorkingImage workingImage)
+        public void QuantizePerTile(WorkingImage workingImage)
         {
-            QuantizeToGameBoyPalette(workingImage);
-            //FirstSweep(workingImage);
-            //SecondSweep(workingImage);
-            //ThirdSweep(workingImage);
-            //ProcessEasyTiles(workingImage);
-            // ProcessTransparentTiles(workingImage);
 
-            //ProcessBasedOnExistingTileColours(workingImage);
-            //ProcessBasedOnBestNearestEstimate(workingImage);
+            FirstSweep(workingImage);
+            SecondSweep(workingImage);
+            ThirdSweep(workingImage);
 
-            //_colourMappingCache.Clear();
+            _colourMappingCache.Clear();
         }
 
-        private void QuantizeToGameBoyPalette(WorkingImage workingImage)
+        public void QuantizePerTileOriginal(WorkingImage workingImage)
         {
-            // Define the Game Boy palette
-            var palette = new[]
-            {
-                Colour.GBWhite,
-                Colour.GBLight,
-                Colour.GBDark,
-                Colour.GBBlack
-            };
+            ProcessEasyTiles(workingImage);
+            ProcessTransparentTiles(workingImage);
+            ProcessBasedOnExistingTileColours(workingImage);
+            ProcessBasedOnBestNearestEstimate(workingImage);
 
+            _colourMappingCache.Clear();
+        }
+
+        public void QuantizeToGameBoyPalette(WorkingImage workingImage)
+        {
             foreach (var tile in workingImage.Tiles)
             {
                 for (int y = 0; y < 8; y++)
@@ -45,16 +41,16 @@ namespace GameboyColorReducer.Core
                     for (int x = 0; x < 8; x++)
                     {
                         var originalColor = tile.GbcPixels[x, y];
-                        var closestColor = FindClosestColor(originalColor, palette);
+                        var closestColor = FindClosestColor(originalColor, Colour.GbColourList);
                         tile.GbPixels[x, y] = closestColor;
                     }
                 }
             }
         }
 
-        private Colour FindClosestColor(Colour originalColor, Colour[] palette)
+        private Colour FindClosestColor(Colour originalColor, IReadOnlySet<Colour> palette)
         {
-            Colour closestColor = palette[0];
+            Colour closestColor = palette.ElementAt(0);
             double closestDistance = double.MaxValue;
 
             foreach (var color in palette)
@@ -72,11 +68,19 @@ namespace GameboyColorReducer.Core
 
         private double GetColorDistance(Colour c1, Colour c2)
         {
-            int rDiff = c1.R - c2.R;
-            int gDiff = c1.G - c2.G;
-            int bDiff = c1.B - c2.B;
-            return Math.Sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+            int rDiff = Math.Abs(c1.R - c2.R);
+            int gDiff = Math.Abs(c1.G - c2.G);
+            int bDiff = Math.Abs(c1.B - c2.B);
+            return rDiff + gDiff + bDiff;
         }
+
+        //private double GetColorDistance(Colour c1, Colour c2)
+        //{
+        //    int rDiff = c1.R - c2.R;
+        //    int gDiff = c1.G - c2.G;
+        //    int bDiff = c1.B - c2.B;
+        //    return Math.Sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+        //}
 
         // colours whole tile
         private void FirstSweep(WorkingImage workingImage)
@@ -295,59 +299,61 @@ namespace GameboyColorReducer.Core
                         {
                             _colourMappingCache.TryAdd(tile.GbcColours, newColourMapping);
                             tile.IsProcessed = true;
+                            continue;
                         }
-                        else
+
+                        
+                    }
+
+                    // todo: rent this object
+                    var colourMapping = new Dictionary<Colour, Colour>();
+                    // search through pixel by pixel then update the cache with the whole tile
+                    for (int y = 0; y < 8; y++)
+                    {
+                        for (int x = 0; x < 8; x++)
                         {
-                            // todo: rent this object
-                            var colourMapping = new Dictionary<Colour, Colour>();
-                            // search through pixel by pixel then update the cache with the whole tile
-                            for (int y = 0; y < 8; y++)
+                            var gbColour = tile.GbPixels[x, y];
+                            var gbcColour = tile.GbcPixels[x, y];
+
+                            if (colourMapping.TryGetValue(gbcColour, out Colour value))
                             {
-                                for (int x = 0; x < 8; x++)
-                                {
-                                    var gbColour = tile.GbPixels[x, y];
-                                    var gbcColour = tile.GbcPixels[x, y];
-
-                                    if (colourMapping.TryGetValue(gbcColour, out Colour value))
-                                    {
-                                        tile.GbPixels[x, y] = value;
-                                    }
-                                    else if (gbColour.IsDefault)
-                                    {
-                                        var existingGbColoursForTile = tile.GbPixels.ToIEnumerable().Where(x => !x.IsDefault);
-
-                                        var gbcColourBrightness = gbcColour.GetBrightness();
-
-                                        var remainingColourOptions = Colour.GbColourList.Except(existingGbColoursForTile);
-
-                                        Colour bestMatch;
-
-                                        try
-                                        {
-                                            bestMatch = remainingColourOptions.OrderBy(x => Math.Abs(x.GetBrightness() - gbcColourBrightness)).First();
-                                        }
-                                        catch
-                                        {
-                                            bestMatch = Colour.FromRgb(255, 87, 51);
-                                        }
-
-                                        tile.GbPixels[x, y] = bestMatch;
-                                        colourMapping.TryAdd(gbcColour, bestMatch);
-                                    }
-                                    else
-                                    {
-                                        colourMapping.TryAdd(gbcColour, gbColour);
-                                    }
-                                }
+                                tile.GbPixels[x, y] = value;
                             }
+                            else if (gbColour.IsDefault)
+                            {
+                                var existingGbColoursForTile = tile.GbPixels.ToIEnumerable().Where(x => !x.IsDefault);
 
-                            _colourMappingCache.TryAdd(tile.GbcColours, colourMapping);
-                            tile.IsProcessed = true;
+                                var gbcColourBrightness = gbcColour.GetBrightness();
+
+                                var remainingColourOptions = Colour.GbColourList.Except(existingGbColoursForTile);
+
+                                Colour bestMatch;
+
+                                try
+                                {
+                                    bestMatch = remainingColourOptions.OrderBy(x => Math.Abs(x.GetBrightness() - gbcColourBrightness)).First();
+                                }
+                                catch
+                                {
+                                    bestMatch = Colour.FromRgb(255, 87, 51);
+                                }
+
+                                tile.GbPixels[x, y] = bestMatch;
+                                colourMapping.TryAdd(gbcColour, bestMatch);
+                            }
+                            else
+                            {
+                                colourMapping.TryAdd(gbcColour, gbColour);
+                            }
                         }
                     }
+
+                    _colourMappingCache.TryAdd(tile.GbcColours, colourMapping);
+                    tile.IsProcessed = true;
                 }
             }
         }
+
 
 
         private List<Tile> GetAdjacentTiles(Tile tile, WorkingImage workingImage)

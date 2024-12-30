@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using BenchmarkDotNet.Running;
 using GameboyColorReducer.Core;
 using GameboyColorReducer.Core.ImageConverters;
 
@@ -7,14 +8,16 @@ Console.WriteLine("Hello, World!");
 
 var g = new ImageSharpImageConverter();
 
-var b = File.ReadAllBytes("Images/ZeldaOracleOfSeasonsTitleScreenFull.png");
+var b = File.ReadAllBytes("Images/PokemonCrystalCeruleanCity.png");
 
 var h = g.ToWorkingImage(b);
 
 var e = new ColourReducer();
 
-e.Process(h);
+e.QuantizePerTile(h);
 
 var k = g.ToByteArray(h);
 
-File.WriteAllBytes("Images/ZeldaOracleOfSeasonsTitleScreenFull-reduced.png", k);
+File.WriteAllBytes("Images/PokemonCrystalCeruleanCity-QuantizePerTile.png", k);
+
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);

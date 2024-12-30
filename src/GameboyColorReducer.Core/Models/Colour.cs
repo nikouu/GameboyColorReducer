@@ -27,7 +27,7 @@ namespace GameboyColorReducer.Core.Models
         public byte B => unchecked((byte)(value >> ARGBBlueShift));
         public byte A => unchecked((byte)(value >> ARGBAlphaShift));
 
-        public static List<Colour> GbColourList => new(_gbColourList);
+        public static FrozenSet<Colour> GbColourList => _gbColourList;
 
         internal Colour(long value, bool isDefault)
         {
