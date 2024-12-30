@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.ObjectPool;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,8 @@ namespace GameboyColorReducer.Core.Models
         public bool IsProcessed { get; set; } = false;
 
         private readonly int _gbcColoursHash;
+        // this will break if multi-threading
+        private static readonly HashSet<Colour> _distinctColourHelper = new();
 
         public Tile(int id, int x, int y, Colour[,] gbcPixels)
         {
@@ -70,13 +73,15 @@ namespace GameboyColorReducer.Core.Models
         }
 
         private static Colour[] GetDistinctOrderedColours(Colour[,] gbcPixels)
-        {
-            var distinctColours = new HashSet<Colour>();
+        {            
             foreach (var colour in gbcPixels)
             {
-                distinctColours.Add(colour);
+                _distinctColourHelper.Add(colour);
             }
-            return [.. distinctColours.OrderBy(x => x.GetHashCode())];
+
+            Colour[] returnColours = [.. _distinctColourHelper.OrderBy(x => x.GetHashCode())];
+            _distinctColourHelper.Clear();
+            return returnColours;
         }
     }
 }
