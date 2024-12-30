@@ -15,19 +15,19 @@ namespace GameboyColorReducer.Core.ImageConverters
         {
             using var image = Image.Load<Rgba32>(inputImage);
             ValidateImage(image);
-
             var tiles = new Tile[image.Width / 8, image.Height / 8];
 
-            // todo: see if width then height, or height then width for performance
-            for (int i = 0; i < image.Width; i += 8)
+            image.ProcessPixelRows(accessor =>
             {
-                for (int j = 0; j < image.Height; j += 8)
+                // todo: see if width then height, or height then width for performance
+                for (int i = 0; i < image.Width; i += 8)
                 {
-                    var gbcPixels = new Colour[8, 8];
-
-                    // todo: can this be a static lambda?
-                    image.ProcessPixelRows(accessor =>
+                    for (int j = 0; j < image.Height; j += 8)
                     {
+                        var gbcPixels = new Colour[8, 8];
+
+                        // todo: can this be a static lambda?
+
                         for (int y = 0; y < 8; y++)
                         {
                             var pixelRow = accessor.GetRowSpan(j + y);
@@ -37,16 +37,16 @@ namespace GameboyColorReducer.Core.ImageConverters
                                 gbcPixels[x, y] = Colour.FromRgb(pixel.A, pixel.R, pixel.G, pixel.B);
                             }
                         }
-                    });
 
-                    var x = i / 8;
-                    var y = j / 8;
+                        var x1 = i / 8;
+                        var y1 = j / 8;
 
-                    var id = (x * (image.Height / 8)) + y;
+                        var id = (x1 * (image.Height / 8)) + y1;
 
-                    tiles[x, y] = new Tile(id, x, y, gbcPixels);
+                        tiles[x1, y1] = new Tile(id, x1, y1, gbcPixels);
+                    }
                 }
-            }
+            });
 
             return new WorkingImage(image.Width, image.Height, tiles);
         }
