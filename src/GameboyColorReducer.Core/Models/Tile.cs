@@ -73,15 +73,18 @@ namespace GameboyColorReducer.Core.Models
         }
 
         private static Colour[] GetDistinctOrderedColours(Colour[,] gbcPixels)
-        {            
+        {
             foreach (var colour in gbcPixels)
             {
                 _distinctColourHelper.Add(colour);
             }
 
-            Colour[] returnColours = [.. _distinctColourHelper.OrderBy(x => x.GetHashCode())];
+            var distinctColoursArray = new Colour[_distinctColourHelper.Count];
+            _distinctColourHelper.CopyTo(distinctColoursArray);
+            Array.Sort(distinctColoursArray, (x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
+
             _distinctColourHelper.Clear();
-            return returnColours;
+            return distinctColoursArray;
         }
     }
 }
