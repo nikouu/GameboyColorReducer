@@ -68,7 +68,7 @@ namespace GameboyColorReducer.Core
         private void ProcessEasyTiles(WorkingImage workingImage)
         {
             // Creates a group of tiles by number of colours in gbColour count descending order. (I.e. 4 gbColour tile group, 3 gbColour, 2 then 1).
-            var tileGroups = workingImage.Tiles.ToIEnumerable().GroupBy(x => x.GbcColours.Length).OrderByDescending(x => x.Key).ToList();
+            var tileGroups = workingImage.Tiles.ToIEnumerable().GroupBy(x => x.GbcColours.Length).OrderByDescending(x => x.Key);
 
             foreach (var tileGroup in tileGroups)
             {
@@ -81,17 +81,7 @@ namespace GameboyColorReducer.Core
                     else if (tile.GbcColours.Length == 4)
                     {
                         ProcessFourColours(tile);
-                    }
-                    else
-                    {
-                        // look at the groups above which are possibly completed
-                        if (tileGroups.Any(x => x.Key == tileGroup.Key + 1))
-                        {
-                            var compareToTiles = tileGroups.Where(x => x.Key == tileGroup.Key + 1).First().Where(x => x.IsProcessed).OrderBy(x => x.GbcColours.Length);
-
-                            //ProcessFromSupersetTiles(tile, compareToTiles);
-                        }
-                    }
+                    }                    
                 }
             }
         }
