@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,7 +37,42 @@ namespace GameboyColorReducer.Core
         /// <returns>True if <paramref name="containingList"/> contains all <paramref name="lookupList"/>, otherwise false.</returns>
         public static bool ContainsAll<T>(this IEnumerable<T> containingList, IEnumerable<T> lookupList)
         {
+            //var a = ContainsAllNew(containingList, lookupList);
+            //var b = ContainsAllOld(containingList, lookupList);
+            //if (a != b)
+            //    throw new InvalidOperationException();
+            //return a;
+
+            return ContainsAllNew(containingList, lookupList);
+        }
+
+        public static bool ContainsAllOld<T>(this IEnumerable<T> containingList, IEnumerable<T> lookupList)
+        {
             return !lookupList.Except(containingList).Any();
+        }
+
+        public static bool ContainsAllNew<T>(this IEnumerable<T> containingList, IEnumerable<T> lookupList)
+        {
+            if (containingList == null)
+                throw new ArgumentNullException(nameof(containingList));
+            if (lookupList == null)
+                throw new ArgumentNullException(nameof(lookupList));
+
+            foreach (var item in lookupList)
+            {
+                bool found = false;
+                foreach (var element in containingList)
+                {
+                    if (EqualityComparer<T>.Default.Equals(element, item))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    return false;
+            }
+            return true;
         }
     }
 }

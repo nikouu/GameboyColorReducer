@@ -18,6 +18,6 @@ e.QuantizePerTile(h);
 
 var k = g.ToByteArray(h);
 
-File.WriteAllBytes("Images/PokemonCrystalCeruleanCity-QuantizePerTile.png", k);
+File.WriteAllBytes("Images/PokemonCrystalCeruleanCity-reduced.png", k);
 
-BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+//BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);

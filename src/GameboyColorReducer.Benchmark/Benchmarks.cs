@@ -35,15 +35,8 @@ namespace GameboyColorReducer.Benchmark
         [Benchmark(Baseline = true)]
         public WorkingImage QuantizePerTileOriginal()
         {
-            _reducer.QuantizePerTileOriginal(_workingImage);
-            return _workingImage;
-        }
-
-        [Benchmark]
-        public WorkingImage QuantizePerTile()
-        {
             _reducer.QuantizePerTile(_workingImage);
             return _workingImage;
-        }        
+        }
     }
 }
