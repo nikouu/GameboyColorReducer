@@ -20,4 +20,6 @@ var k = g.ToByteArray(h);
 
 File.WriteAllBytes("Images/PokemonCrystalCeruleanCity-reduced.png", k);
 
-//BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+#if !DEBUG
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+#endif

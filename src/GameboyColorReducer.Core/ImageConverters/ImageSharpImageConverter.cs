@@ -54,14 +54,14 @@ namespace GameboyColorReducer.Core.ImageConverters
         public byte[] ToByteArray(WorkingImage workingImage)
         {
             using var image = new Image<Rgba32>(workingImage.Width, workingImage.Height);
-
-            for (int i = 0; i < workingImage.Width; i += 8)
+            image.ProcessPixelRows(accessor =>
             {
-                for (int j = 0; j < workingImage.Height; j += 8)
+                for (int i = 0; i < workingImage.Width; i += 8)
                 {
-                    var tile = workingImage.Tiles[i / 8, j / 8];
-                    image.ProcessPixelRows(accessor =>
+                    for (int j = 0; j < workingImage.Height; j += 8)
                     {
+                        var tile = workingImage.Tiles[i / 8, j / 8];
+
                         // todo: validate colour count per tile
                         for (int y = 0; y < 8; y++)
                         {
@@ -72,10 +72,10 @@ namespace GameboyColorReducer.Core.ImageConverters
                                 pixelRow[i + x] = new Rgba32(color.R, color.G, color.B, color.A);
                             }
                         }
-                    });
-                }
-            }
 
+                    }
+                }
+            });
             using var ms = new MemoryStream();
             image.SaveAsPng(ms);
             return ms.ToArray();

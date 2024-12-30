@@ -18,7 +18,7 @@ namespace GameboyColorReducer.Core.Models
         public Colour[,] GbPixels => _gbPixels;
 
         public readonly Colour[] GbcColours;
-        public readonly string GbcColoursKey;
+        //public readonly int GbcColoursKey;
 
         public bool IsProcessed { get; set; } = false;
 
@@ -32,7 +32,7 @@ namespace GameboyColorReducer.Core.Models
             GbcPixels = gbcPixels;
 
             GbcColours = [.. gbcPixels.Cast<Colour>().Distinct().OrderBy(x => x.GetHashCode())];
-            GbcColoursKey = GenerateColourKeyString();
+            //GbcColoursKey = GenerateColourKey();
 
             var hash = 0;
             foreach (var colour in GbcColours)
@@ -71,16 +71,26 @@ namespace GameboyColorReducer.Core.Models
             return _gbcColoursHash;
         }
 
-        public string GenerateColourKeyString()
-        {
-            var stringBuilder = new StringBuilder();
+        //public int GenerateColourKey()
+        //{
+        //    //var stringBuilder = new StringBuilder();
 
-            foreach (var item in GbcColours.OrderBy(x => x.GetBrightness()))
-            {
-                stringBuilder.Append(item);
-            }
+        //    //foreach (var item in GbcColours.OrderBy(x => x.GetBrightness()))
+        //    //{
+        //    //    stringBuilder.Append(item);
+        //    //}
 
-            return stringBuilder.ToString();
-        }
+        //    //return stringBuilder.ToString();
+
+        //    //return string.Join("", GbcColours.OrderBy(x => x.GetBrightness()));
+
+        //    int key = 0;
+        //    foreach (var colour in GbcColours.OrderBy(x => x.GetBrightness()))
+        //    {
+        //        key ^= colour.GetHashCode();
+        //        key = (key << 5) | (key >> (32 - 5)); // Rotate left by 5 bits
+        //    }
+        //    return key;
+        //}
     }
 }
