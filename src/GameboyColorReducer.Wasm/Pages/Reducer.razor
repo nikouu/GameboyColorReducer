@@ -2,9 +2,6 @@
 @using GameboyColorReducer.Core
 @using GameboyColorReducer.Core.Models;
 @using GameboyColorReducer.Core.ImageConverters
-@using BlazorWorker.BackgroundServiceFactory
-@using BlazorWorker.Core
-@inject IWorkerFactory workerFactory
 @inject IJSRuntime JS
 
 <h1>Gameboy Color Reducer</h1>
@@ -118,49 +115,44 @@
         await JS.InvokeVoidAsync("setupPreviewImage", previewImageElem, GetDataUrl(buffer));
         //await JS.InvokeVoidAsync("previewImage", inputFile!.Element, previewImageElem);
 
-        // var image = await Task.Run(() => imageSharpImageConverter.ToWorkingImage(buffer));
+        var image = await Task.Run(() => imageSharpImageConverter.ToWorkingImage(buffer));
 
-        // var tileReducedTask = Task.Run(() =>
-        // {
-        //     var tileImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for tile reduction
-        //     colourReducer.QuantizePerTile(tileImage);
-        //     var tileReduced = imageSharpImageConverter.ToByteArray(tileImage);
-        //     return tileReduced;
-        // });
+        var tileReducedTask = Task.Run(() =>
+        {
+            var tileImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for tile reduction
+            StateHasChanged();    // request a render
+            Task.Delay(1);  // allow the render to execute
+            colourReducer.QuantizePerTile(tileImage);
+            StateHasChanged();    // request a render
+            Task.Delay(1);  // allow the render to execute
+            var tileReduced = imageSharpImageConverter.ToByteArray(tileImage);
+            StateHasChanged();    // request a render
+            Task.Delay(1);  // allow the render to execute
+            return tileReduced;
+        });
 
-        // var artReducedTask = Task.Run(() =>
-        // {
-        //     var artImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for art reduction
-        //     colourReducer.QuantizeToGameBoyPalette(artImage);
-        //     var artReduced = imageSharpImageConverter.ToByteArray(artImage);
-        //     return artReduced;
-        // });
+        var artReducedTask = Task.Run(() =>
+        {
+            var artImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for art reduction
+            StateHasChanged();    // request a render
+            Task.Delay(1);  // allow the render to execute
+            colourReducer.QuantizeToGameBoyPalette(artImage);
+            StateHasChanged();    // request a render
+            Task.Delay(1);  // allow the render to execute
+            var artReduced = imageSharpImageConverter.ToByteArray(artImage);
+            StateHasChanged();    // request a render
+            Task.Delay(1);  // allow the render to execute
+            return artReduced;
+        });
 
-        // await Task.WhenAll(tileReducedTask, artReducedTask);
+        await Task.WhenAll(tileReducedTask, artReducedTask);
 
-        // // already completed
-        // var tileReduced = await tileReducedTask;
-        // var artReduced = await artReducedTask;
+        // already completed
+        var tileReduced = await tileReducedTask;
+        var artReduced = await artReducedTask;
 
-        // await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", tileReducedElem, GetDataUrl(tileReduced)));
-        // await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", artReducedElem, GetDataUrl(artReduced)));
-
-        var worker = await workerFactory.CreateAsync();
-        var converterService = await worker.CreateBackgroundServiceAsync<ImageSharpImageConverter>();
-        var reducerService = await worker.CreateBackgroundServiceAsync<ColourReducer>();
-
-        //var image2 = await converterService.RunAsync(x => x.ToWorkingImage(buffer));
-
-        var image2 = await Task.Run(() => imageSharpImageConverter.ToWorkingImage(buffer));
-
-        await reducerService.RunAsync(x => x.QuantizePerTile(image2));
-        var tileReduced2 = await converterService.RunAsync(x => x.ToByteArray(image2));
-
-        await reducerService.RunAsync(x => x.QuantizeToGameBoyPalette(image2));
-        var artReduced2 = await converterService.RunAsync(x => x.ToByteArray(image2));
-
-        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", tileReducedElem, GetDataUrl(tileReduced2)));
-        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", artReducedElem, GetDataUrl(artReduced2)));        
+        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", tileReducedElem, GetDataUrl(tileReduced)));
+        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", artReducedElem, GetDataUrl(artReduced)));
     }
 
     private string GetDataUrl(byte[] buffer)
