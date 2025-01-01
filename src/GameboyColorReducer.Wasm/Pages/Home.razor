@@ -1,7 +1,183 @@
 ﻿@page "/"
+@using GameboyColorReducer.Core
+@using GameboyColorReducer.Core.Models;
+@using GameboyColorReducer.Core.ImageConverters
+@inject IJSRuntime JS
 
-<PageTitle>Home</PageTitle>
+<style>
+    .drop-area {
+        width: 400px;
+        height: 200px;
+        margin: 20px auto;
+        text-align: center;
+        line-height: 200px;
+        border: 2px dashed #ccc;
+        cursor: pointer;
+    }
 
-<h1>Hello, world!</h1>
+    #file-input {
+        width: 400px;
+        height: 200px;
+        margin: 20px auto;
+        text-align: center;
+        line-height: 200px;
+        border: 2px dashed #ccc;
+        cursor: pointer;
+    }
 
-Welcome to your new app.
+    .preview-container {
+        text-align: center;
+        max-height: 100%;
+    }
+
+    .drop-area.drag-over {
+        background-color: #eee;
+    }
+</style>
+
+<h1>Gameboy Color Reducer</h1>
+
+<div class="col-lg-6 col-md-8 mx-auto">
+    <div class="row">
+        <div class="col">
+            <h2>Original Image</h2>
+            <label for="file-input" class="drop-area" @ref="dropAreaElem">
+                <span id="drop-text">Drag your Gameboy Color image here</span>
+                <img class="preview-container" @ref="previewImageElem" />
+            </label>
+            <InputFile id="file-input" @ref="inputFile" OnChange="Process" style="display: none;" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h2>Tile Reducer</h2>
+            <img class="preview-container" @ref="tileReducedElem" />
+        </div>
+        <div class="col">
+            <h2>Art Reducer</h2>
+            <img class="preview-container" @ref="artReducedElem" />
+        </div>
+    </div>
+</div>
+
+<script>
+    window.initializeDropArea = (dropArea, fileInput) => {
+        // Utility function to prevent default browser behavior
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Preventing default browser behavior when dragging a file over the container
+        dropArea.addEventListener('dragover', preventDefaults);
+        dropArea.addEventListener('dragenter', preventDefaults);
+        dropArea.addEventListener('dragleave', preventDefaults);
+
+        // Handling dropping files into the area
+        dropArea.addEventListener('drop', handleDrop);
+
+        function handleDrop(e) {
+            preventDefaults(e);
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+
+        dropArea.addEventListener('dragover', () => {
+            dropArea.classList.add('drag-over');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('drag-over');
+        });
+
+        window.setupPreviewImage = (inputElem, imgElem) => {
+            const dropText = document.getElementById('drop-text');
+            dropText.style.display = 'none';
+
+            window.setImageSrc(inputElem, imgElem);
+        }
+
+        window.setImageSrc = (imgElem, src) => {
+            imgElem.src = src;
+        };
+
+        window.previewImage = (inputElem, imgElem) => {
+            const dropText = document.getElementById('drop-text');
+            dropText.style.display = 'none';
+
+            const url = URL.createObjectURL(inputElem.files[0]);
+            imgElem.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
+            imgElem.src = url;
+        }
+    }
+</script>
+
+@code {
+    private InputFile? inputFile;
+    private ElementReference previewImageElem;
+    private ElementReference dropAreaElem;
+    private ElementReference tileReducedElem;
+    private ElementReference artReducedElem;
+    private ImageSharpImageConverter imageSharpImageConverter;
+    private ColourReducer colourReducer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        imageSharpImageConverter = new ImageSharpImageConverter();
+        colourReducer = new ColourReducer();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeDropArea", dropAreaElem, inputFile!.Element);
+        }
+    }
+
+    private async Task Process(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer);
+
+        await JS.InvokeVoidAsync("setupPreviewImage", previewImageElem, GetDataUrl(buffer));
+        //await JS.InvokeVoidAsync("previewImage", inputFile!.Element, previewImageElem);
+
+        var image = await Task.Run(() => imageSharpImageConverter.ToWorkingImage(buffer));
+
+        var tileReducedTask = Task.Run(() =>
+        {
+            var tileImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for tile reduction
+            colourReducer.QuantizePerTile(tileImage);
+            var tileReduced = imageSharpImageConverter.ToByteArray(tileImage);
+            return tileReduced;
+        });
+
+        var artReducedTask = Task.Run(() =>
+        {
+            var artImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for art reduction
+            colourReducer.QuantizeToGameBoyPalette(artImage);
+            var artReduced = imageSharpImageConverter.ToByteArray(artImage);
+            return artReduced;
+        });
+
+        await Task.WhenAll(tileReducedTask, artReducedTask);
+
+        // already completed
+        var tileReduced = await tileReducedTask;
+        var artReduced = await artReducedTask;
+
+        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", tileReducedElem, GetDataUrl(tileReduced)));
+        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", artReducedElem, GetDataUrl(artReduced)));
+    }
+
+    private string GetDataUrl(byte[] buffer)
+    {
+        var base64String = Convert.ToBase64String(buffer);
+        var imageDataUrl = $"data:image/png;base64,{base64String}";
+        return imageDataUrl;
+    }
+}
