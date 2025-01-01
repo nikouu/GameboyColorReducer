@@ -6,7 +6,7 @@ using GameboyColorReducer.Core.ImageConverters;
 
 Console.WriteLine("Hello, World!");
 
-var filename = "ZeldaOracleOfAgesNayruSinging";
+var filename = "PokemonCrystalCeruleanCity";
 
 var g = new ImageSharpImageConverter();
 

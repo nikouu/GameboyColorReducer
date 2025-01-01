@@ -23,6 +23,7 @@ namespace GameboyColorReducer.Core.Models
         public bool IsProcessed { get; set; } = false;
 
         private readonly int _gbcColoursHash;
+
         // this will break if multi-threading
         private static readonly HashSet<Colour> _distinctColourHelper = new();
 

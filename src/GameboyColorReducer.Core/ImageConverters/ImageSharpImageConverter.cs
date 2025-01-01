@@ -24,9 +24,7 @@ namespace GameboyColorReducer.Core.ImageConverters
                 {
                     for (int j = 0; j < image.Height; j += 8)
                     {
-                        var gbcPixels = new Colour[8, 8];
-
-                        // todo: can this be a static lambda?
+                        var gbcPixels = new Colour[8, 8];         
 
                         for (int y = 0; y < 8; y++)
                         {
