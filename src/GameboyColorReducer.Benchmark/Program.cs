@@ -6,9 +6,11 @@ using GameboyColorReducer.Core.ImageConverters;
 
 Console.WriteLine("Hello, World!");
 
+var filename = "ZeldaOracleOfAgesNayruSinging";
+
 var g = new ImageSharpImageConverter();
 
-var b = File.ReadAllBytes("Images/PokemonCrystalCeruleanCity.png");
+var b = File.ReadAllBytes($"Images/{filename}.png");
 
 var h = g.ToWorkingImage(b);
 
@@ -18,7 +20,16 @@ e.QuantizePerTile(h);
 
 var k = g.ToByteArray(h);
 
-File.WriteAllBytes("Images/PokemonCrystalCeruleanCity-reduced.png", k);
+File.WriteAllBytes($"Images/{filename}-reduced.png", k);
+
+e.QuantizeToGameBoyPalette(h);
+
+File.WriteAllBytes($"Images/{filename}-reduced-gb-palette.png", g.ToByteArray(h));
+
+
+
+
+
 
 #if !DEBUG
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);

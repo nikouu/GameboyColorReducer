@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Images\LinksAwakeningDXIntro.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Images\PokemonCrystalCeruleanCity.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -32,6 +35,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Images\Wall1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\ZeldaOracleOfAgesNayruSinging.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Images\ZeldaOracleOfSeasonsIntro.png">
