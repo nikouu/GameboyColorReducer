@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace GameboyColorReducer.Benchmark
 {
     [MemoryDiagnoser]
-    public class Benchmarks
+    public class ReducerBenchmarks
     {
         private byte[] _imageData;
         private ColourReducer _reducer;
