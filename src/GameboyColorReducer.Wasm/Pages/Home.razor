@@ -19,13 +19,15 @@
         <div class="reducer-container">
             <h2>Tile Reducer</h2>
             <div class="image-wrapper">
-                <img class="preview-container" @ref="tileReducedElem" />
+                <img class="preview-container" id="tileReduced" @ref="tileReducedElem" />
+                <button class="download-button" onclick="downloadImage('tileReduced', 'tile')" style="display: none;">Download</button>
             </div>
         </div>
         <div class="reducer-container">
             <h2>Art Reducer</h2>
             <div class="image-wrapper">
-                <img class="preview-container" @ref="artReducedElem" />
+                <img class="preview-container" id="artReduced" @ref="artReducedElem" />
+                <button class="download-button" onclick="downloadImage('artReduced', 'art')" style="display: none;">Download</button>
             </div>
         </div>
     </div>
@@ -33,18 +35,15 @@
 
 <script>
     window.initializeDropArea = (dropArea, fileInput) => {
-        // Utility function to prevent default browser behavior
         function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
         }
 
-        // Preventing default browser behavior when dragging a file over the container
         dropArea.addEventListener('dragover', preventDefaults);
         dropArea.addEventListener('dragenter', preventDefaults);
         dropArea.addEventListener('dragleave', preventDefaults);
 
-        // Handling dropping files into the area
         dropArea.addEventListener('drop', handleDrop);
 
         function handleDrop(e) {
@@ -72,15 +71,33 @@
 
         window.setImageSrc = (imgElem, src) => {
             imgElem.src = src;
+            showDownloadButton(imgElem);
         };
 
-        window.previewImage = (inputElem, imgElem) => {
-            const dropText = document.getElementById('drop-text');
-            dropText.style.display = 'none';
+        window.showDownloadButton = (imgElem) => {
+            const button = imgElem.nextElementSibling;
+            if (button && button.classList.contains('download-button')) {
+                button.style.display = 'block';
+            }
+        }
 
-            const url = URL.createObjectURL(inputElem.files[0]);
-            imgElem.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
-            imgElem.src = url;
+         window.downloadImage = (elemRef, suffix) => {
+            const imgElem = document.getElementById(elemRef);
+            const fileInput = document.getElementById('file-input');
+            if (imgElem && fileInput && fileInput.files.length > 0) {
+                const originalFilename = fileInput.files[0].name;
+                const dotIndex = originalFilename.lastIndexOf('.');
+                const filename = dotIndex !== -1
+                    ? `${originalFilename.substring(0, dotIndex)}-${suffix}${originalFilename.substring(dotIndex)}`
+                    : `${originalFilename}-${suffix}`;
+
+                const link = document.createElement('a');
+                link.href = imgElem.src;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
     }
 </script>
@@ -115,13 +132,12 @@
         await file.OpenReadStream().ReadAsync(buffer);
 
         await JS.InvokeVoidAsync("setupPreviewImage", previewImageElem, GetDataUrl(buffer));
-        //await JS.InvokeVoidAsync("previewImage", inputFile!.Element, previewImageElem);
 
         var image = await Task.Run(() => imageSharpImageConverter.ToWorkingImage(buffer));
 
         var tileReducedTask = Task.Run(() =>
         {
-            var tileImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for tile reduction
+            var tileImage = imageSharpImageConverter.ToWorkingImage(buffer);
             colourReducer.QuantizePerTile(tileImage);
             var tileReduced = imageSharpImageConverter.ToByteArray(tileImage);
             return tileReduced;
@@ -129,7 +145,7 @@
 
         var artReducedTask = Task.Run(() =>
         {
-            var artImage = imageSharpImageConverter.ToWorkingImage(buffer); // Create a separate instance for art reduction
+            var artImage = imageSharpImageConverter.ToWorkingImage(buffer);
             colourReducer.QuantizeToGameBoyPalette(artImage);
             var artReduced = imageSharpImageConverter.ToByteArray(artImage);
             return artReduced;
@@ -137,7 +153,6 @@
 
         await Task.WhenAll(tileReducedTask, artReducedTask);
 
-        // already completed
         var tileReduced = await tileReducedTask;
         var artReduced = await artReducedTask;
 
