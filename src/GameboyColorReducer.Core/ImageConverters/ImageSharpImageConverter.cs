@@ -19,7 +19,6 @@ namespace GameboyColorReducer.Core.ImageConverters
 
             image.ProcessPixelRows(accessor =>
             {
-                // todo: see if width then height, or height then width for performance
                 for (int i = 0; i < image.Width; i += 8)
                 {
                     for (int j = 0; j < image.Height; j += 8)

@@ -2,26 +2,80 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-h1:focus {
-    outline: none;
+.drop-area {
+    width: 160px;
+    height: 144px;
+    margin: 20px auto;
+    text-align: center;
+    border: 2px dashed #ccc;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box; /* Ensure padding is included in the width and height */
 }
 
-a, .btn-link {
-    color: #0071c1;
+.preview-container {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+.drop-area.drag-over {
+    background-color: #eee;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+    width: 100%;
 }
 
-.content {
-    padding-top: 1.1rem;
+/* Full width for divs 1 and 2 */
+#original-image-container, #output-container {
+    width: 100%;
+}
+
+/* Flexbox for output container */
+#output-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Flex items for divs 3 and 4 */
+.reducer-container {
+    flex: 1 1 45%; /* Allow items to grow and shrink, and set a base width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+    .reducer-container .image-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    /* Resize image when flex wrap occurs */
+    .reducer-container img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+/* Ensure flex items take full width on small screens */
+@media (max-width: 800px) {
+    .reducer-container {
+        flex: 1 1 100%;
+    }
 }
 
 .valid.modified:not([type=checkbox]) {

@@ -4,58 +4,29 @@
 @using GameboyColorReducer.Core.ImageConverters
 @inject IJSRuntime JS
 
-<style>
-    .drop-area {
-        width: 400px;
-        height: 200px;
-        margin: 20px auto;
-        text-align: center;
-        line-height: 200px;
-        border: 2px dashed #ccc;
-        cursor: pointer;
-    }
-
-    #file-input {
-        width: 400px;
-        height: 200px;
-        margin: 20px auto;
-        text-align: center;
-        line-height: 200px;
-        border: 2px dashed #ccc;
-        cursor: pointer;
-    }
-
-    .preview-container {
-        text-align: center;
-        max-height: 100%;
-    }
-
-    .drop-area.drag-over {
-        background-color: #eee;
-    }
-</style>
-
 <h1>Gameboy Color Reducer</h1>
 
-<div class="col-lg-6 col-md-8 mx-auto">
-    <div class="row">
-        <div class="col">
-            <h2>Original Image</h2>
-            <label for="file-input" class="drop-area" @ref="dropAreaElem">
-                <span id="drop-text">Drag your Gameboy Color image here</span>
-                <img class="preview-container" @ref="previewImageElem" />
-            </label>
-            <InputFile id="file-input" @ref="inputFile" OnChange="Process" style="display: none;" />
-        </div>
+<div class="container">
+    <div id="original-image-container">
+        <h2>Original Image</h2>
+        <label for="file-input" class="drop-area" @ref="dropAreaElem">
+            <span id="drop-text">Drag your Gameboy Color image here</span>
+            <img class="preview-container" @ref="previewImageElem" />
+        </label>
+        <InputFile id="file-input" @ref="inputFile" OnChange="Process" style="display: none;" />
     </div>
-    <div class="row">
-        <div class="col">
+    <div id="output-container">
+        <div class="reducer-container">
             <h2>Tile Reducer</h2>
-            <img class="preview-container" @ref="tileReducedElem" />
+            <div class="image-wrapper">
+                <img class="preview-container" @ref="tileReducedElem" />
+            </div>
         </div>
-        <div class="col">
+        <div class="reducer-container">
             <h2>Art Reducer</h2>
-            <img class="preview-container" @ref="artReducedElem" />
+            <div class="image-wrapper">
+                <img class="preview-container" @ref="artReducedElem" />
+            </div>
         </div>
     </div>
 </div>
