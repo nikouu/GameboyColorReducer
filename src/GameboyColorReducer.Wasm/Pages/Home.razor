@@ -13,7 +13,7 @@
             <span id="drop-text">Drag your Gameboy Color image here</span>
             <img class="preview-container" @ref="previewImageElem" />
         </label>
-        <InputFile id="file-input" @ref="inputFile" OnChange="Process" style="display: none;" />
+        <InputFile id="file-input" @ref="inputFile" OnChange="Process" accept=".png" style="display: none;" />
         <div id="error-container" class="error-container" style="@(string.IsNullOrEmpty(errorMessage) ? "display: none;" : "display: block;")">
             @errorMessage
         </div>
@@ -143,7 +143,7 @@
             errorMessage = string.Empty;
             var file = e.File;
             var buffer = new byte[file.Size];
-            await file.OpenReadStream().ReadAsync(buffer);
+            await file.OpenReadStream(maxAllowedSize: 1024000).ReadAsync(buffer);
 
             await JS.InvokeVoidAsync("setupPreviewImage", previewImageElem, GetDataUrl(buffer));
 
