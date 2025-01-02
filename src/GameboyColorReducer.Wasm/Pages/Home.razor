@@ -14,6 +14,9 @@
             <img class="preview-container" @ref="previewImageElem" />
         </label>
         <InputFile id="file-input" @ref="inputFile" OnChange="Process" style="display: none;" />
+        <div id="error-container" class="error-container" style="@(string.IsNullOrEmpty(errorMessage) ? "display: none;" : "display: block;")">
+            @errorMessage
+        </div>
     </div>
     <div id="output-container">
         <div class="reducer-container">
@@ -81,7 +84,14 @@
             }
         }
 
-         window.downloadImage = (elemRef, suffix) => {
+        window.hideDownloadButtons = () => {
+            const buttons = document.querySelectorAll('.download-button');
+            buttons.forEach(button => {
+                button.style.display = 'none';
+            });
+        };
+
+        window.downloadImage = (elemRef, suffix) => {
             const imgElem = document.getElementById(elemRef);
             const fileInput = document.getElementById('file-input');
             if (imgElem && fileInput && fileInput.files.length > 0) {
@@ -110,6 +120,7 @@
     private ElementReference artReducedElem;
     private ImageSharpImageConverter imageSharpImageConverter;
     private ColourReducer colourReducer;
+    private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -127,37 +138,57 @@
 
     private async Task Process(InputFileChangeEventArgs e)
     {
-        var file = e.File;
-        var buffer = new byte[file.Size];
-        await file.OpenReadStream().ReadAsync(buffer);
-
-        await JS.InvokeVoidAsync("setupPreviewImage", previewImageElem, GetDataUrl(buffer));
-
-        var image = await Task.Run(() => imageSharpImageConverter.ToWorkingImage(buffer));
-
-        var tileReducedTask = Task.Run(() =>
+        try
         {
-            var tileImage = imageSharpImageConverter.ToWorkingImage(buffer);
-            colourReducer.QuantizePerTile(tileImage);
-            var tileReduced = imageSharpImageConverter.ToByteArray(tileImage);
-            return tileReduced;
-        });
+            errorMessage = string.Empty;
+            var file = e.File;
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
 
-        var artReducedTask = Task.Run(() =>
+            await JS.InvokeVoidAsync("setupPreviewImage", previewImageElem, GetDataUrl(buffer));
+
+            var image = await Task.Run(() => imageSharpImageConverter.ToWorkingImage(buffer));
+
+            var tileReducedTask = Task.Run(() =>
+            {
+                var tileImage = imageSharpImageConverter.ToWorkingImage(buffer);
+                colourReducer.QuantizePerTile(tileImage);
+                var tileReduced = imageSharpImageConverter.ToByteArray(tileImage);
+                return tileReduced;
+            });
+
+            var artReducedTask = Task.Run(() =>
+            {
+                var artImage = imageSharpImageConverter.ToWorkingImage(buffer);
+                colourReducer.QuantizeToGameBoyPalette(artImage);
+                var artReduced = imageSharpImageConverter.ToByteArray(artImage);
+                return artReduced;
+            });
+
+            await Task.WhenAll(tileReducedTask, artReducedTask);
+
+            var tileReduced = await tileReducedTask;
+            var artReduced = await artReducedTask;
+
+            await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", tileReducedElem, GetDataUrl(tileReduced)));
+            await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", artReducedElem, GetDataUrl(artReduced)));
+        }
+        catch (ReducerException ex)
         {
-            var artImage = imageSharpImageConverter.ToWorkingImage(buffer);
-            colourReducer.QuantizeToGameBoyPalette(artImage);
-            var artReduced = imageSharpImageConverter.ToByteArray(artImage);
-            return artReduced;
-        });
-
-        await Task.WhenAll(tileReducedTask, artReducedTask);
-
-        var tileReduced = await tileReducedTask;
-        var artReduced = await artReducedTask;
-
-        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", tileReducedElem, GetDataUrl(tileReduced)));
-        await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", artReducedElem, GetDataUrl(artReduced)));
+            errorMessage = ex.Message;
+            await ClearPreviewContainers();
+            await HideDownloadButtons();
+            await InvokeAsync(StateHasChanged);
+            Console.WriteLine(ex);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            await ClearPreviewContainers();
+            await HideDownloadButtons();
+            await InvokeAsync(StateHasChanged);
+            Console.WriteLine(ex);
+        }
     }
 
     private string GetDataUrl(byte[] buffer)
@@ -165,5 +196,16 @@
         var base64String = Convert.ToBase64String(buffer);
         var imageDataUrl = $"data:image/png;base64,{base64String}";
         return imageDataUrl;
+    }
+
+    private async Task ClearPreviewContainers()
+    {
+        await JS.InvokeVoidAsync("setImageSrc", tileReducedElem, "");
+        await JS.InvokeVoidAsync("setImageSrc", artReducedElem, "");
+    }
+
+    private async Task HideDownloadButtons()
+    {
+        await JS.InvokeVoidAsync("hideDownloadButtons");
     }
 }

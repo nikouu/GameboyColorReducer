@@ -80,6 +80,12 @@ namespace GameboyColorReducer.Core.Models
                 _distinctColourHelper.Add(colour);
             }
 
+            if (_distinctColourHelper.Count > 4)
+            {
+                _distinctColourHelper.Clear();
+                throw new ReducerException("At least one tile has more than 4 colours.");
+            }
+
             var distinctColoursArray = new Colour[_distinctColourHelper.Count];
             _distinctColourHelper.CopyTo(distinctColoursArray);
             Array.Sort(distinctColoursArray, (x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
