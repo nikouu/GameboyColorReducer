@@ -15,37 +15,47 @@
             <img class="preview-container" @ref="previewImageElem" />
         </label>
         <InputFile id="file-input" @ref="inputFile" OnChange="Process" accept=".png" style="display: none;" />
-        <div id="error-container" class="error-container" style="@(string.IsNullOrEmpty(errorMessage) ? "display: none;" : "display: block;")">
-            @errorMessage
-        </div>
-    </div>
-    <div id="output-container">
-        <div class="reducer-container">
-            <h2>Tile Reducer</h2>
-            <div class="image-wrapper">
-                <img class="preview-container" id="tileReduced" @ref="tileReducedElem" />
-                <button class="download-button" onclick="downloadImage('tileReduced', 'tile')" style="display: none;">Download</button>
-            </div>
-        </div>
-        <div class="reducer-container">
-            <h2>Art Reducer</h2>
-            <div class="image-wrapper">
-                <img class="preview-container" id="artReduced" @ref="artReducedElem" />
-                <button class="download-button" onclick="downloadImage('artReduced', 'art')" style="display: none;">Download</button>
+        <div>
+            <p class="example-text">Examples</p>
+            <div class="example-buttons">
+                <button class="example-button left" @onclick="@(() => LoadExampleImage("img/LinksAwakeningDXIntro.png"))">Links Awakening DX intro</button>
+                <button class="example-button middle" @onclick="@(() => LoadExampleImage("img/ZeldaOracleOfSeasonsTitleScreenFull.png"))">Oracle of Seasons title screen</button>
+                <button class="example-button right" @onclick="@(() => LoadExampleImage("img/PokemonCrystalCeruleanCity.png"))">GSC Cerulean City</button>
             </div>
         </div>
     </div>
-    <div style="text-align: left;">
-        <h2>How does this work?</h2>
-        <p>
-            <ul>
-                <li>Your image is processed in-browser by two different algorithms to quantize/reduce the colours.</li>
-                <li>The <strong>Tile Reducer</strong> algorithm quantizes the colours per 8x8 tile and is best suited for tilesets.</li>
-                <li>The <strong>Art Reducer</strong> algorithm quantizes the colours to the original Gameboy Color palette and is best suited for art or cutscene stills.</li>
-            </ul>
-        </p>
-        <p>Read more about it on <a href="https://github.com/nikouu/GameboyColorReducer" target="_blank">GitHub</a>.</p>
+    <div id="error-container" class="error-container" style="@(string.IsNullOrEmpty(errorMessage) ? "display: none;" : "display: block;")">
+        @errorMessage
     </div>
+</div>
+<div id="output-container">
+    <div class="reducer-container">
+        <h2>Tile Reducer</h2>
+        <p style="margin-top:0px">Best suited for tilesets</p>
+        <div class="image-wrapper">
+            <img class="preview-container" id="tileReduced" @ref="tileReducedElem" />
+            <button class="download-button" onclick="downloadImage('tileReduced', 'tile')" style="display: none;">Download</button>
+        </div>
+    </div>
+    <div class="reducer-container">
+        <h2>Art Reducer</h2>
+        <p style="margin-top:0px">Best suited for art or cutscene stills</p>
+        <div class="image-wrapper">
+            <img class="preview-container" id="artReduced" @ref="artReducedElem" />
+            <button class="download-button" onclick="downloadImage('artReduced', 'art')" style="display: none;">Download</button>
+        </div>
+    </div>
+</div>
+<div style="text-align: left;">
+    <h2>How does this work?</h2>
+    <p>
+        <ul>
+            <li>Your image is processed in-browser by two different algorithms to quantize/reduce the colours.</li>
+            <li>The <strong>Tile Reducer</strong> algorithm quantizes the colours per 8x8 tile and is best suited for tilesets.</li>
+            <li>The <strong>Art Reducer</strong> algorithm quantizes the colours to the original Gameboy Color palette and is best suited for art or cutscene stills.</li>
+        </ul>
+    </p>
+    <p>Read more about it on <a href="https://github.com/nikouu/GameboyColorReducer" target="_blank">GitHub</a>.</p>
 </div>
 
 <script>
@@ -120,6 +130,16 @@
                 link.click();
                 document.body.removeChild(link);
             }
+        }
+
+        window.loadExampleImage = async (fileInput, imageUrl) => {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const file = new File([blob], imageUrl.split('/').pop(), { type: blob.type });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
         }
     }
 </script>
@@ -211,5 +231,10 @@
     private async Task HideDownloadButtons()
     {
         await JS.InvokeVoidAsync("hideDownloadButtons");
+    }
+
+    private async Task LoadExampleImage(string imageUrl)
+    {
+        await JS.InvokeVoidAsync("loadExampleImage", inputFile!.Element, imageUrl);
     }
 }

@@ -47,6 +47,7 @@ html, body {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
+    min-height: 240px;
 }
 
 /* Flex items for divs 3 and 4 */
@@ -95,6 +96,49 @@ html, body {
         flex: 1 1 100%;
     }
 }
+
+.example-container {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.example-text {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.example-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.example-button {
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    transition: background-color 0.3s;
+}
+
+    .example-button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .example-button.left {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+    }
+
+    .example-button.right {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    .example-button.middle {
+        border-left: none;
+        border-right: none;
+    }
+
 
 /* Base styles */
 main {
