@@ -5,6 +5,7 @@
 @inject IJSRuntime JS
 
 <h1>Gameboy Color Reducer</h1>
+<p>Drag and drop your Gameboy Color image to reduce the number of colours to the original Gameboy Color palette.</p>
 
 <div class="container">
     <div id="original-image-container">
@@ -33,6 +34,17 @@
                 <button class="download-button" onclick="downloadImage('artReduced', 'art')" style="display: none;">Download</button>
             </div>
         </div>
+    </div>
+    <div style="text-align: left;">
+        <h2>How does this work?</h2>
+        <p>
+            <ul>
+                <li>Your image is processed in-browser by two different algorithms to quantize/reduce the colours.</li>
+                <li>The <strong>Tile Reducer</strong> algorithm quantizes the colours per 8x8 tile and is best suited for tilesets.</li>
+                <li>The <strong>Art Reducer</strong> algorithm quantizes the colours to the original Gameboy Color palette and is best suited for art or cutscene stills.</li>
+            </ul>
+        </p>
+        <p>Read more about it on <a href="https://github.com/nikouu/GameboyColorReducer" target="_blank">GitHub</a>.</p>
     </div>
 </div>
 
@@ -172,14 +184,6 @@
 
             await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", tileReducedElem, GetDataUrl(tileReduced)));
             await InvokeAsync(() => JS.InvokeVoidAsync("setImageSrc", artReducedElem, GetDataUrl(artReduced)));
-        }
-        catch (ReducerException ex)
-        {
-            errorMessage = ex.Message;
-            await ClearPreviewContainers();
-            await HideDownloadButtons();
-            await InvokeAsync(StateHasChanged);
-            Console.WriteLine(ex);
         }
         catch (Exception ex)
         {
