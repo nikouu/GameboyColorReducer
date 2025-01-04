@@ -33,7 +33,9 @@
         <h2>Tile Reducer</h2>
         <p style="margin-top:0px">Best suited for tilesets</p>
         <div class="image-wrapper">
-            <img class="preview-container" id="tileReduced" @ref="tileReducedElem" />
+            <a id="tileReducedLink" target="_blank">
+                <img class="preview-container" id="tileReduced" @ref="tileReducedElem" />
+            </a>
             <button class="download-button" onclick="downloadImage('tileReduced', 'tile')" style="display: none;">Download</button>
         </div>
     </div>
@@ -41,7 +43,9 @@
         <h2>Art Reducer</h2>
         <p style="margin-top:0px">Best suited for art or cutscene stills</p>
         <div class="image-wrapper">
-            <img class="preview-container" id="artReduced" @ref="artReducedElem" />
+            <a id="artReducedLink" target="_blank">
+                <img class="preview-container" id="artReduced" @ref="artReducedElem" />
+            </a>
             <button class="download-button" onclick="downloadImage('artReduced', 'art')" style="display: none;">Download</button>
         </div>
     </div>
@@ -86,62 +90,80 @@
         dropArea.addEventListener('dragleave', () => {
             dropArea.classList.remove('drag-over');
         });
+    }
 
-        window.setupPreviewImage = (inputElem, imgElem) => {
-            const dropText = document.getElementById('drop-text');
-            dropText.style.display = 'none';
+    window.setupPreviewImage = (inputElem, imgElem) => {
+        const dropText = document.getElementById('drop-text');
+        dropText.style.display = 'none';
 
-            window.setImageSrc(inputElem, imgElem);
+        window.setImageSrc(inputElem, imgElem);
+    }
+
+    window.setImageSrc = (imgElem, src) => {
+        imgElem.src = src;
+        const linkElem = imgElem.parentElement;
+        if (linkElem && linkElem.tagName === 'A') {
+            // Convert base64 to Blob
+            const byteString = atob(src.split(',')[1]);
+            const mimeString = src.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeString });
+            const blobUrl = URL.createObjectURL(blob);
+            linkElem.href = blobUrl;
         }
+        showDownloadButton(imgElem);
+    };
 
-        window.setImageSrc = (imgElem, src) => {
-            imgElem.src = src;
-            showDownloadButton(imgElem);
-        };
-
-        window.showDownloadButton = (imgElem) => {
-            const button = imgElem.nextElementSibling;
-            if (button && button.classList.contains('download-button')) {
+    window.showDownloadButton = (imgElem) => {
+        const wrapper = imgElem.closest('.image-wrapper');
+        if (wrapper) {
+            const button = wrapper.querySelector('.download-button');
+            if (button) {
                 button.style.display = 'block';
             }
         }
+    };
 
-        window.hideDownloadButtons = () => {
-            const buttons = document.querySelectorAll('.download-button');
-            buttons.forEach(button => {
-                button.style.display = 'none';
-            });
-        };
+    window.hideDownloadButtons = () => {
+        const buttons = document.querySelectorAll('.download-button');
+        buttons.forEach(button => {
+            button.style.display = 'none';
+        });
+    };
 
-        window.downloadImage = (elemRef, suffix) => {
-            const imgElem = document.getElementById(elemRef);
-            const fileInput = document.getElementById('file-input');
-            if (imgElem && fileInput && fileInput.files.length > 0) {
-                const originalFilename = fileInput.files[0].name;
-                const dotIndex = originalFilename.lastIndexOf('.');
-                const filename = dotIndex !== -1
-                    ? `${originalFilename.substring(0, dotIndex)}-${suffix}${originalFilename.substring(dotIndex)}`
-                    : `${originalFilename}-${suffix}`;
+    window.downloadImage = (elemRef, suffix) => {
+        const imgElem = document.getElementById(elemRef);
+        const fileInput = document.getElementById('file-input');
+        if (imgElem && fileInput && fileInput.files.length > 0) {
+            const originalFilename = fileInput.files[0].name;
+            const dotIndex = originalFilename.lastIndexOf('.');
+            const filename = dotIndex !== -1
+                ? `${originalFilename.substring(0, dotIndex)}-${suffix}${originalFilename.substring(dotIndex)}`
+                : `${originalFilename}-${suffix}`;
 
-                const link = document.createElement('a');
-                link.href = imgElem.src;
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
-
-        window.loadExampleImage = async (fileInput, imageUrl) => {
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            const file = new File([blob], imageUrl.split('/').pop(), { type: blob.type });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            fileInput.files = dataTransfer.files;
-            fileInput.dispatchEvent(new Event('change'));
+            const link = document.createElement('a');
+            link.href = imgElem.src;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     }
+
+    window.loadExampleImage = async (fileInput, imageUrl) => {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], imageUrl.split('/').pop(), { type: blob.type });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+    }
+
 </script>
 
 @code {
