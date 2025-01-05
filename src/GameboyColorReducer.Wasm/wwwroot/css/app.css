@@ -45,12 +45,11 @@ p {
     padding-bottom: 20px;
 }
 
-/* Full width for divs 1 and 2 */
 #original-image-container, #output-container {
     width: 100%;
+    padding-bottom: 20px;
 }
 
-/* Flexbox for output container */
 #output-container {
     display: flex;
     flex-wrap: wrap;
@@ -59,19 +58,16 @@ p {
     min-height: 240px;
 }
 
-/* Flex items for divs 3 and 4 */
 .reducer-container {
-    flex: 1 1 45%; /* Allow items to grow and shrink, and set a base width */
+    flex: 1 1 45%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #f0f0f0; /* Light grey background */
-    border: 1px solid #333; /* Dark border for contrast */
     padding: 10px;
     box-sizing: border-box;
 }
 
-    .reducer-container h2 {       
+    .reducer-container h2 {
         margin-bottom: 10px;
     }
 
@@ -82,17 +78,22 @@ p {
 .download-button {
     margin-top: 10px;
     padding: 5px 10px;
-    background-color: #007bff;
+    background-color: #4CAF50;
     color: white;
-    border: none;
-    border-radius: 5px;
+    border: 2px solid #333;
+    border-radius: 0;
     cursor: pointer;
     display: block;
     min-width: max-content;
+    font-family: inherit;
+    font-size: 1em;
+    text-transform: uppercase;
+    box-shadow: 2px 2px #333;
 }
 
     .download-button:hover {
-        background-color: #0056b3;
+        background-color: #45a049;
+        box-shadow: 1px 1px #333;
     }
 
 .reducer-container .image-wrapper {
@@ -103,14 +104,12 @@ p {
     flex-direction: column;
 }
 
-/* Resize image when flex wrap occurs */
 .reducer-container img {
     max-width: 100%;
     height: auto;
     display: block;
 }
 
-/* Ensure flex items take full width on small screens */
 @media (max-width: 800px) {
     .reducer-container {
         flex: 1 1 100%;
@@ -165,30 +164,29 @@ p {
 /* Base styles */
 main {
     width: 100%;
-    max-width: 1200px; /* Maximum width for large screens */
-    margin: 0 auto; /* Center the container */
-    padding: 0 20px; /* Add some padding for small screens */
-    box-sizing: border-box; /* Include padding in the width */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
     text-align: center;
 }
 
-/* Responsive adjustments */
 @media (max-width: 1200px) {
     .container {
-        max-width: 1000px; /* Adjust max-width for medium screens */
+        max-width: 1000px;
     }
 }
 
 @media (max-width: 1000px) {
     .container {
-        max-width: 800px; /* Adjust max-width for smaller screens */
+        max-width: 800px;
     }
 }
 
 @media (max-width: 800px) {
     .container {
-        max-width: 100%; /* Full width for very small screens */
-        padding: 0 10px; /* Reduce padding for very small screens */
+        max-width: 100%;
+        padding: 0 10px;
     }
 }
 
