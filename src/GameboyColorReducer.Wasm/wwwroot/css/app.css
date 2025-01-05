@@ -1,5 +1,12 @@
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Silkscreen', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-optical-sizing: auto;
+    background-color: #f8f8f8;
+    color: #333;
+}
+
+p {
+    font-size: 1.3em;
 }
 
 .drop-area {
@@ -7,13 +14,14 @@ html, body {
     height: 144px;
     margin: 20px auto;
     text-align: center;
-    border: 2px dashed #ccc;
+    border: 2px dashed #333;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
-    box-sizing: border-box; /* Ensure padding is included in the width and height */
+    box-sizing: border-box;
+    background-color: #e0e0e0;
 }
 
 .preview-container {
@@ -24,7 +32,7 @@ html, body {
 }
 
 .drop-area.drag-over {
-    background-color: #eee;
+    background-color: #ccc;
 }
 
 .container {
@@ -34,6 +42,7 @@ html, body {
     align-items: center;
     text-align: center;
     width: 100%;
+    padding-bottom: 20px;
 }
 
 /* Full width for divs 1 and 2 */
@@ -56,7 +65,19 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-color: #f0f0f0; /* Light grey background */
+    border: 1px solid #333; /* Dark border for contrast */
+    padding: 10px;
+    box-sizing: border-box;
 }
+
+    .reducer-container h2 {       
+        margin-bottom: 10px;
+    }
+
+    .reducer-container p {
+        margin-top: 0;
+    }
 
 .download-button {
     margin-top: 10px;
@@ -64,11 +85,10 @@ html, body {
     background-color: #007bff;
     color: white;
     border: none;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+    border-radius: 5px;
     cursor: pointer;
-    display: block; /* Ensure the button is displayed as a block element */
-    min-width: max-content; /* Ensure the button is at least as wide as its content */
+    display: block;
+    min-width: max-content;
 }
 
     .download-button:hover {
@@ -103,7 +123,7 @@ html, body {
 }
 
 .example-text {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     font-weight: bold;
 }
 
@@ -113,15 +133,17 @@ html, body {
 }
 
 .example-button {
-    border: 1px solid #ccc;
+    border: 1px solid #333;
     padding: 10px 20px;
     cursor: pointer;
-    background-color: #f0f0f0;
+    background-color: #e0e0e0;
     transition: background-color 0.3s;
+    font-family: inherit;
+    font-size: 1.1em;
 }
 
     .example-button:hover {
-        background-color: #e0e0e0;
+        background-color: #ccc;
     }
 
     .example-button.left {

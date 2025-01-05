@@ -16,7 +16,7 @@
         </label>
         <InputFile id="file-input" @ref="inputFile" OnChange="Process" accept=".png" style="display: none;" />
         <div>
-            <p class="example-text">Examples</p>
+            <h2 class="example-text">Examples</h2>
             <div class="example-buttons">
                 <button class="example-button left" @onclick="@(() => LoadExampleImage("img/LinksAwakeningDXIntro.png"))">Links Awakening DX intro</button>
                 <button class="example-button middle" @onclick="@(() => LoadExampleImage("img/ZeldaOracleOfSeasonsTitleScreenFull.png"))">Oracle of Seasons title screen</button>
@@ -27,34 +27,35 @@
     <div id="error-container" class="error-container" style="@(string.IsNullOrEmpty(errorMessage) ? "display: none;" : "display: block;")">
         @errorMessage
     </div>
-</div>
-<div id="output-container">
-    <div class="reducer-container">
-        <h2>Tile Reducer</h2>
-        <p style="margin-top:0px">Best suited for tilesets</p>
-        <div class="image-wrapper">
-            <a id="tileReducedLink" target="_blank">
-                <img class="preview-container" id="tileReduced" @ref="tileReducedElem" />
-            </a>
-            <button class="download-button" onclick="downloadImage('tileReduced', 'tile')" style="display: none;">Download</button>
+
+    <div id="output-container">
+        <div class="reducer-container">
+            <h2>Tile Reducer</h2>
+            <p style="margin-top:0px">Best suited for tilesets</p>
+            <div class="image-wrapper">
+                <a id="tileReducedLink" target="_blank">
+                    <img class="preview-container" id="tileReduced" @ref="tileReducedElem" />
+                </a>
+                <button class="download-button" onclick="downloadImage('tileReduced', 'tile')" style="display: none;">Download</button>
+            </div>
+        </div>
+        <div class="reducer-container">
+            <h2>Art Reducer</h2>
+            <p style="margin-top:0px">Best suited for art or cutscene stills</p>
+            <div class="image-wrapper">
+                <a id="artReducedLink" target="_blank">
+                    <img class="preview-container" id="artReduced" @ref="artReducedElem" />
+                </a>
+                <button class="download-button" onclick="downloadImage('artReduced', 'art')" style="display: none;">Download</button>
+            </div>
         </div>
     </div>
-    <div class="reducer-container">
-        <h2>Art Reducer</h2>
-        <p style="margin-top:0px">Best suited for art or cutscene stills</p>
-        <div class="image-wrapper">
-            <a id="artReducedLink" target="_blank">
-                <img class="preview-container" id="artReduced" @ref="artReducedElem" />
-            </a>
-            <button class="download-button" onclick="downloadImage('artReduced', 'art')" style="display: none;">Download</button>
-        </div>
+    <div style="text-align: left; padding-top: 50px;">
+        <h2>What is this?</h2>
+        <p>Your image is processed in-browser by two different algorithms to quantize/reduce the colours.</p>
+        <p>Acknowledgement to <a href="https://github.com/SixLabors/ImageSharp" target="_blank">ImageSharp</a> - used to help process the image.</p>
+        <p>Read more about it on <a href="https://github.com/nikouu/GameboyColorReducer" target="_blank">GitHub</a>.</p>
     </div>
-</div>
-<div style="text-align: left;">
-    <h2>What is this?</h2>
-    <p>Your image is processed in-browser by two different algorithms to quantize/reduce the colours.</p>
-    <p>Acknowledgement to <a href="https://github.com/SixLabors/ImageSharp" target="_blank">ImageSharp</a> - used to help process the image.</p>
-    <p>Read more about it on <a href="https://github.com/nikouu/GameboyColorReducer" target="_blank">GitHub</a>.</p>
 </div>
 
 <script>
@@ -97,7 +98,7 @@
     window.setImageSrc = (imgElem, src) => {
         imgElem.src = src;
         const linkElem = imgElem.parentElement;
-        if (linkElem && linkElem.tagName === 'A') {
+        if (linkElem && linkElem.tagName === 'A' && src !== '') {
             // Convert base64 to Blob
             const byteString = atob(src.split(',')[1]);
             const mimeString = src.split(',')[0].split(':')[1].split(';')[0];
@@ -109,8 +110,8 @@
             const blob = new Blob([ab], { type: mimeString });
             const blobUrl = URL.createObjectURL(blob);
             linkElem.href = blobUrl;
-        }
-        showDownloadButton(imgElem);
+            showDownloadButton(imgElem);
+        }        
     };
 
     window.showDownloadButton = (imgElem) => {
