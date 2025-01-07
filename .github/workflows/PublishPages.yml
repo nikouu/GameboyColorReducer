@@ -5,17 +5,23 @@ on:
     branches:
       - main
 
+    workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: windows-latest # no need to install the .net sdk as it's available for this runner
     steps:
-      # Checkout the code
       - uses: actions/checkout@v4
 
       - name: Install .NET WebAssembly Tools
         run: dotnet workload install wasm-tools
 
-      # Publish the site
       - name: Publish
         run: dotnet publish src/GameboyColorReducer.Wasm/GameboyColorReducer.Wasm.csproj -c:Release -o:publish -p:GHPages=true
 
