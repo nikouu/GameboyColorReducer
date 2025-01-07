@@ -23,7 +23,7 @@ jobs:
         run: dotnet workload install wasm-tools
 
       - name: Publish
-        run: dotnet publish src/GameboyColorReducer.Wasm/GameboyColorReducer.Wasm.csproj -c:Release -o:publish -p:GHPages=true -p:GHPagesBase=GameboyColorReducer # though this should be set automatically, unsure why it isn't
+        run: dotnet publish src/GameboyColorReducer.Wasm/GameboyColorReducer.Wasm.csproj -c:Release -o:publish -p:GHPages=true
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3.0.1
