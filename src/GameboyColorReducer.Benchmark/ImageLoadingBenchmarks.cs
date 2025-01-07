@@ -20,7 +20,7 @@ namespace GameboyColorReducer.Benchmark
         [Benchmark(Baseline = true)]
         public WorkingImage ToWorkingImage()
         {
-            return _imageConverter.ToWorkingImage(_imageData);            
+            return _imageConverter.ToWorkingImage(_imageData);
         }
     }
 }

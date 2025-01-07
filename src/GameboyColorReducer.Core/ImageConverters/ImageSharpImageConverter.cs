@@ -1,11 +1,6 @@
 ﻿using GameboyColorReducer.Core.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameboyColorReducer.Core.ImageConverters
 {
@@ -23,7 +18,7 @@ namespace GameboyColorReducer.Core.ImageConverters
                 {
                     for (int j = 0; j < image.Height; j += 8)
                     {
-                        var gbcPixels = new Colour[8, 8];         
+                        var gbcPixels = new Colour[8, 8];
 
                         for (int y = 0; y < 8; y++)
                         {

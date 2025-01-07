@@ -1,9 +1,4 @@
 ﻿using GameboyColorReducer.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameboyColorReducer.Core
 {
@@ -12,7 +7,7 @@ namespace GameboyColorReducer.Core
         private Dictionary<Colour[], Dictionary<Colour, Colour>> _colourMappingCache = new(new ColourArrayEqualityComparer());
 
         // todo: issue where white obviously needs to be used, but a brighter colour takes over. see the cerulean city windows
- 
+
         public void QuantizePerTile(WorkingImage workingImage)
         {
             ProcessEasyTiles(workingImage);
@@ -81,7 +76,7 @@ namespace GameboyColorReducer.Core
                     else if (tile.GbcColours.Length == 4)
                     {
                         ProcessFourColours(tile);
-                    }                    
+                    }
                 }
             }
         }

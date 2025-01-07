@@ -2,11 +2,6 @@
 using GameboyColorReducer.Core;
 using GameboyColorReducer.Core.ImageConverters;
 using GameboyColorReducer.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameboyColorReducer.Benchmark
 {
@@ -21,7 +16,7 @@ namespace GameboyColorReducer.Benchmark
         [GlobalSetup]
         public void Setup()
         {
-            _imageData = File.ReadAllBytes("Images/PokemonCrystalCeruleanCity.png");           
+            _imageData = File.ReadAllBytes("Images/PokemonCrystalCeruleanCity.png");
             _reducer = new ColourReducer();
             _imageConverter = new ImageSharpImageConverter();
         }
