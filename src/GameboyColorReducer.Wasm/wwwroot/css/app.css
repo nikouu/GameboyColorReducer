@@ -129,6 +129,7 @@ p {
 .example-buttons {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .example-button {
@@ -188,6 +189,28 @@ main {
         max-width: 100%;
         padding: 0 10px;
     }
+}
+
+@media (max-width: 600px) {
+    .example-buttons {
+        flex-direction: column;
+    }
+
+    .example-button {
+        width: 100%;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+        .example-button.middle {
+            border-left: 1px solid #333;
+            border-right: 1px solid #333;
+        }
+
+        .example-button.left,
+        .example-button.right {
+            border-radius: 5px;
+        }
 }
 
 .error-container {
