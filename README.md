@@ -1,6 +1,8 @@
 # Gameboy Color Reducer
 Reduce/decrease/simplify Gameboy Color images images online to the four colours of the original Gameboy (DMG).
 
+[Try it right now via GitHub Pages!](https://nikouu.github.io/GameboyColorReducer/)
+
 ![preview image](etc/Preview.png)
 
 Check out the example buttons to get started, or use your own image. All images are processed in-browser.
